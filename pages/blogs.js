@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from './includes/Header';
+
 const Blogs = ({ blogs }) => {
     return (
         <div>
@@ -21,14 +22,27 @@ const Blogs = ({ blogs }) => {
 export default Blogs;
 
 export async function getStaticProps() {
-    // Fetch data from your API endpoint
-    const res = await fetch('https://backend-9mwl.onrender.com/all-blogs');
-    const data = await res.json();
+    try {
+        // Fetch data from your API endpoint
+        const res = await fetch('https://backend-9mwl.onrender.com/all-blogs');
+        if (!res.ok) {
+            throw new Error('Failed to fetch data');
+        }
+        const data = await res.json();
 
-    // Pass data to the component props
-    return {
-        props: {
-            blogs: data.blogs,
-        },
-    };
+        // Pass data to the component props
+        return {
+            props: {
+                blogs: data.blogs,
+            },
+            revalidate: 60, // Re-generate the page every 60 seconds
+        };
+    } catch (error) {
+        console.error('Error fetching data:', error.message);
+        return {
+            props: {
+                blogs: [], // Return an empty array if fetching fails
+            },
+        };
+    }
 }
